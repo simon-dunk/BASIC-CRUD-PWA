@@ -1,19 +1,21 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 // AWS SDK v3 imports
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { 
-    DynamoDBDocumentClient, 
-    ScanCommand, 
-    PutCommand, 
-    UpdateCommand, 
-    DeleteCommand 
+import {
+    DynamoDBDocumentClient,
+    ScanCommand,
+    PutCommand,
+    UpdateCommand,
+    DeleteCommand
 } from "@aws-sdk/lib-dynamodb";
 
 // --- AWS Configuration ---
-const client = new DynamoDBClient(); // e.g., 'us-west-2'
+const client = new DynamoDBClient();
 const docClient = DynamoDBDocumentClient.from(client);
 const tableName = 'employees';
 
@@ -21,21 +23,17 @@ const app = express();
 const PORT = 7070;
 const HOST = '10.200.26.218';
 
+// Helper to get the current directory name in ES Modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+console.log
+
 app.use(cors());
 app.use(bodyParser.json());
 
+app.use(express.static(path.join(__dirname)));
+
 // --- API Endpoints ---
-
-// GET all employees
-app.get('/', async (req, res) => {
-    try {
-        res.sendFile('index.html', { root: '.' });
-    } catch (error) {
-        console.error("Error loading home page:", error);
-        res.status(404).send(error);
-    }
-});
-
 app.get('/api/employees', async (req, res) => {
     const command = new ScanCommand({ TableName: tableName });
     try {
