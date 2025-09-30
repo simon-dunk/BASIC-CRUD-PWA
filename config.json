@@ -1,0 +1,6 @@
+{
+  "HOST": "10.200.26.218",
+  "PORT": 7070,
+  "API_URL": "http://10.200.26.218:7070/api/employees",
+  "DYNAMODB_TABLE_NAME": "employees"
+}

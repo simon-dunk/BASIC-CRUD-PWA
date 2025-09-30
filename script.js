@@ -8,12 +8,10 @@ const formTitle = document.getElementById('form-title');
 const submitButton = document.getElementById('submit-button');
 const cancelButton = document.getElementById('cancel-button');
 
-// --- API Base URL ---
-const API_URL = 'http://10.200.26.218:7070/api/employees';
-
 // --- State ---
 let employees = [];
 let isEditing = false;
+let API_URL = ''; // This will be loaded from the server's config endpoint
 
 // --- Functions ---
 
@@ -43,6 +41,7 @@ function renderEmployees() {
 
 // FETCH all employees from the server
 async function fetchEmployees() {
+    if (!API_URL) return; // Don't fetch if config isn't loaded
     try {
         const response = await fetch(API_URL);
         employees = await response.json();
@@ -125,8 +124,21 @@ function resetForm() {
 cancelButton.addEventListener('click', resetForm);
 
 // --- Initial Load ---
-document.addEventListener('DOMContentLoaded', () => {
-    fetchEmployees(); // Fetch employees on page load
+async function initializeApp() {
+    // Fetch the configuration from the server's API
+    try {
+        const response = await fetch('/api/config');
+        const config = await response.json();
+        
+        // Use the relative URL provided by the server
+        API_URL = config.apiUrl;
+
+        // Now that we have the config, fetch the employees
+        await fetchEmployees();
+    } catch (error) {
+        console.error('Error loading application configuration:', error);
+        employeeList.innerHTML = `<li class="p-4 text-center text-red-500">Could not load app configuration.</li>`;
+    }
 
     // Register the Service Worker
     if ('serviceWorker' in navigator) {
@@ -134,4 +146,6 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(registration => console.log('Service Worker registered with scope:', registration.scope))
             .catch(error => console.error('Service Worker registration failed:', error));
     }
-});
+}
+
+document.addEventListener('DOMContentLoaded', initializeApp);
