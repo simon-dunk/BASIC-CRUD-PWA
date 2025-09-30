@@ -1,11 +1,11 @@
 {
-  "name": "employee-catalog-backend",
+  "name": "employee-catalog-pwa",
   "version": "1.0.0",
-  "description": "Backend for the Employee Catalog PWA",
-  "main": "server.js",
+  "description": "A PWA for the Employee Catalog",
+  "main": "./src/server/server.js",
   "type": "module",
   "scripts": {
-    "start": "nodemon server.js"
+    "start": "nodemon container/src/server/server.js"
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.501.0",

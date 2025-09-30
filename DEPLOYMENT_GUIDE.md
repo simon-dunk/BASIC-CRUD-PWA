@@ -146,22 +146,27 @@ Create a file named `Dockerfile` (no extension) in the root of your project dire
 
 ```dockerfile
 # Use an official Node.js runtime as a parent image
-FROM node:18-slim
+FROM node:22-slim
+
+# Update system packages to reduce vulnerabilities and remove unnecessary packages
+RUN apt-get update && apt-get upgrade -y && apt-get autoremove -y && apt-get clean
 
 # Set the working directory in the container
 WORKDIR /usr/src/app
 
-# Copy package.json and package-lock.json
+# Copy the application folder into the container
+COPY container/ .
+
+# Install app dependencies from the root package.json
+# Note: This assumes you run `npm install` locally before building
+# A more robust solution might copy package.json first, run npm install, then copy the rest
 COPY package*.json ./
+RUN npm install --omit=dev
 
-# Install app dependencies
-RUN npm install
+# Change to the application source directory
+WORKDIR /usr/src/app/src/server
 
-# Copy the rest of the application's code
-COPY . .
-
-# Your app runs on a port defined by an environment variable. 
-# App Runner will set this variable. We expose it here.
+# App Runner provides the PORT env var. We expose it.
 EXPOSE 8080
 
 # Define the command to run your app

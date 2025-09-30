@@ -1,0 +1,26 @@
+# Use an official Node.js runtime as a parent image
+FROM node:22-slim
+
+# Update system packages to reduce vulnerabilities and remove unnecessary packages
+RUN apt-get update && apt-get upgrade -y && apt-get autoremove -y && apt-get clean
+
+# Set the working directory in the container
+WORKDIR /usr/src/app
+
+# Copy the application folder into the container
+COPY container/ .
+
+# Install app dependencies from the root package.json
+# Note: This assumes you run `npm install` locally before building
+# A more robust solution might copy package.json first, run npm install, then copy the rest
+COPY package*.json ./
+RUN npm install --omit=dev
+
+# Change to the application source directory
+WORKDIR /usr/src/app/src/server
+
+# App Runner provides the PORT env var. We expose it.
+EXPOSE 8080
+
+# Define the command to run your app
+CMD ["node", "server.js"]

@@ -3,10 +3,11 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import dotenv from 'dotenv'; // Import dotenv
+import dotenv from 'dotenv';
 
-// Load environment variables from .env file
-dotenv.config();
+// Adjust path to look for .env in the parent directory
+dotenv.config({ path: path.resolve(process.cwd(), '.env') });
+
 
 // AWS SDK v3 imports
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
@@ -18,12 +19,10 @@ import {
     DeleteCommand
 } from "@aws-sdk/lib-dynamodb";
 
-
 // --- Configuration from Environment Variables ---
-const HOST = process.env.HOST || '0.0.0.0'; // Use host from .env or default for containers
-const PORT = process.env.PORT || 8080;   // App Runner provides the PORT variable
+const HOST = process.env.HOST || '0.0.0.0';
+const PORT = process.env.PORT || 8080;
 const DYNAMODB_TABLE_NAME = process.env.DYNAMODB_TABLE_NAME;
-
 
 // --- AWS Configuration ---
 const client = new DynamoDBClient();
@@ -37,8 +36,9 @@ const __dirname = path.dirname(__filename);
 
 app.use(cors());
 app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname)));
 
+// Serve static files from the 'public' directory
+app.use(express.static(path.join(__dirname, '../client')));
 
 // --- Configuration Endpoint for the Client ---
 app.get('/api/config', (req, res) => {
@@ -46,7 +46,6 @@ app.get('/api/config', (req, res) => {
         apiUrl: `/api/employees` // Use a relative URL
     });
 });
-
 
 // --- API Endpoints ---
 app.get('/api/employees', async (req, res) => {
@@ -59,8 +58,6 @@ app.get('/api/employees', async (req, res) => {
         res.status(500).send(error);
     }
 });
-
-// ... (rest of your POST, PUT, DELETE endpoints remain the same, just use DYNAMODB_TABLE_NAME)
 
 // CREATE a new employee
 app.post('/api/employees', async (req, res) => {
@@ -119,7 +116,6 @@ app.delete('/api/employees/:id', async (req, res) => {
         res.status(500).send(error);
     }
 });
-
 
 app.listen(PORT, HOST, () => {
   console.log(`Server running on http://${HOST}:${PORT}`);
